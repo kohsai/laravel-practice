@@ -17,7 +17,7 @@
 
     <footer>
         <hr>
-        <small>&copy; {{ date('Y') }} KOH's Laravel</small>
+        <small>&copy; {{ date('Y') }} KOH's Laravel-practice</small>
     </footer>
 
 </body>
