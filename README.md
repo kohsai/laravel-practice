@@ -9,8 +9,9 @@ Dockerを用いて Laravel 開発環境を構築し、日々の学習記録を `
 
 - Day1: Laravel環境構築（Docker, GitHub初期設定など）
 
-- Day2: 基本ルーティングとBlade（ルート定義 / Controller経由 / View表示）
 
+- Day2: 基本ルーティングとBlade（ルート定義 / Controller経由 / View表示）
+  ↳ [logs/day2-routing-blade.md](logs/day2-routing-blade.md)
 
 ---
 
