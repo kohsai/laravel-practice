@@ -21,7 +21,10 @@ class TaskController extends Controller
     // 保存処理（POST /tasks）
     public function store(Request $request)
     {
-        return 'タスクを保存しました（仮）';
+        $title = $request->input('title');
+        $description = $request->input('description');
+
+        return "タイトル：{$title} <br> 詳細：{$description}";
     }
 
     // 個別表示（GET /tasks/{task}）
