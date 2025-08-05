@@ -9,13 +9,13 @@ class TaskController extends Controller
     // 一覧表示（GET /tasks）
     public function index()
     {
-        return 'タスク一覧を表示します';
+        return view('tasks.index');
     }
 
     // 作成フォーム表示（GET /tasks/create）
     public function create()
     {
-        return 'タスク作成フォームを表示します';
+        return view('tasks.create');
     }
 
     // 保存処理（POST /tasks）
@@ -27,13 +27,13 @@ class TaskController extends Controller
     // 個別表示（GET /tasks/{task}）
     public function show(string $id)
     {
-        return "ID: {$id} のタスクを表示します";
+        return view('tasks.show', ['id' => $id]);
     }
 
     // 編集フォーム表示（GET /tasks/{task}/edit）
     public function edit(string $id)
     {
-        return "ID: {$id} のタスク編集フォームを表示します";
+        return view('tasks.edit',['id => $id']);
     }
 
     // 更新処理（PUT /tasks/{task}）
