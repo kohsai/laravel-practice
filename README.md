@@ -1,6 +1,6 @@
 # Laravel-practice
 
-このプロジェクトは、Laravelの学習と実践のための開発環境です。  
+このプロジェクトは、Laravelの学習と実践のための開発環境です。
 Dockerを用いて Laravel 開発環境を構築し、日々の学習記録を `logs/` ディレクトリに記録しています。
 
 ---
@@ -12,6 +12,15 @@ Dockerを用いて Laravel 開発環境を構築し、日々の学習記録を `
 
 - Day2: 基本ルーティングとBlade（ルート定義 / Controller経由 / View表示）
   ↳ [logs/day2-routing-blade.md](logs/day2-routing-blade.md)
+
+
+- Day3: RESTfulルーティングとリソースコントローラの基礎
+  - Route::resource による7アクションの自動定義
+  - TaskController に各アクションメソッド（index, create, store 等）を実装
+  - Bladeビュー `index.blade.php`, `create.blade.php` を作成
+  - create → store のフォーム送信とController処理の連携確認
+  ↳ [logs/day3-routing-restful.md](logs/day3-routing-restful.md)
+
 
 ---
 
@@ -38,7 +47,7 @@ docker-compose up -d --build
 
 ブラウザで以下にアクセス：
 
-- http://localhost:8080 （Laravelアプリ）  
+- http://localhost:8080 （Laravelアプリ）
 - http://localhost:8081 （phpMyAdmin）
 
 ---
