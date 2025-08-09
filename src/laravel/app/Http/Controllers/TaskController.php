@@ -36,18 +36,25 @@ class TaskController extends Controller
     // 編集フォーム表示（GET /tasks/{task}/edit）
     public function edit(string $id)
     {
-        return view('tasks.edit',['id => $id']);
+        return view('tasks.edit', ['id' => $id]);
     }
 
     // 更新処理（PUT /tasks/{task}）
     public function update(Request $request, string $id)
     {
-        return "ID: {$id} のタスクを更新しました（仮）";
+        // (仮) 更新処理
+        $title = $request->input('title');
+        $description = $request->input('description');
+
+        return redirect()->route('tasks.index')
+            ->with('status', "ID: {$id} を更新しました（仮）タイトル：{$title}／詳細：{$description}");
     }
 
     // 削除処理（DELETE /tasks/{task}）
     public function destroy(string $id)
     {
-        return "ID: {$id} のタスクを削除しました（仮）";
+        // (仮) 削除処理
+        return redirect()->route('tasks.index')
+            ->with('status', "ID: {$id} を削除しました（仮）");
     }
 }
