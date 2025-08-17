@@ -14,10 +14,12 @@
     </header>
 
     <main>
+        {{-- 成功メッセージの表示（フラッシュ） --}}
         @if (session('status'))
-            <p>{{ session('status') }}</p>
+            <div class="alert alert-success">{{ session('status') }}</div>
         @endif
 
+        {{-- 各ページの本文  --}}
         @yield('content')
     </main>
 

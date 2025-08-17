@@ -3,13 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Task;
+use App\Http\Requests\TaskRequest;
 
 class TaskController extends Controller
 {
     // 一覧表示（GET /tasks）
     public function index()
     {
-        return view('tasks.index');
+        $tasks = Task::latest()->get(); // created_at の新しい順
+        return view('tasks.index', compact('tasks'));
     }
 
     // 作成フォーム表示（GET /tasks/create）
@@ -18,43 +21,51 @@ class TaskController extends Controller
         return view('tasks.create');
     }
 
-    // 保存処理（POST /tasks）
-    public function store(Request $request)
+    // store（最小のバリデーション＋保存＋リダイレクト）
+    public function store(TaskRequest $request)
     {
-        $title = $request->input('title');
-        $description = $request->input('description');
+        $validated = $request->validated();
+        Task::create($validated);
 
-        return "タイトル：{$title} <br> 詳細：{$description}";
+        return redirect()->route('tasks.index')
+            ->with('status', 'タスクを作成しました');
     }
+
 
     // 個別表示（GET /tasks/{task}）
     public function show(string $id)
     {
-        return view('tasks.show', ['id' => $id]);
+        $task = Task::findOrFail($id);
+        return view('tasks.show', ['task' => $task]);
     }
 
     // 編集フォーム表示（GET /tasks/{task}/edit）
     public function edit(string $id)
     {
-        return view('tasks.edit', ['id' => $id]);
+        $task = Task::findOrFail($id);
+        return view('tasks.edit', ['task' => $task]); // ← $taskを渡す
     }
 
-    // 更新処理（PUT /tasks/{task}）
-    public function update(Request $request, string $id)
-    {
-        // (仮) 更新処理
-        $title = $request->input('title');
-        $description = $request->input('description');
 
-        return redirect()->route('tasks.index')
-            ->with('status', "ID: {$id} を更新しました（仮）タイトル：{$title}／詳細：{$description}");
+    // update（最小のバリデーション＋更新）
+    public function update(TaskRequest $request, string $id)
+    {
+        $validated = $request->validated();
+
+        $task = Task::findOrFail($id);  // ← 現状のメソッドシグネチャを維持
+        $task->update($validated);
+
+        return redirect()->route('tasks.show', $task)
+            ->with('status', 'タスクを更新しました');
     }
 
     // 削除処理（DELETE /tasks/{task}）
     public function destroy(string $id)
     {
-        // (仮) 削除処理
+        $task = Task::findOrFail($id);
+        $task->delete();
+
         return redirect()->route('tasks.index')
-            ->with('status', "ID: {$id} を削除しました（仮）");
+        ->with('status', "ID: {$id}を削除しました");
     }
 }
