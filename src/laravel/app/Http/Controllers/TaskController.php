@@ -33,26 +33,22 @@ class TaskController extends Controller
 
 
     // 個別表示（GET /tasks/{task}）
-    public function show(string $id)
+    public function show(Task $task)
     {
-        $task = Task::findOrFail($id);
         return view('tasks.show', ['task' => $task]);
     }
 
     // 編集フォーム表示（GET /tasks/{task}/edit）
-    public function edit(string $id)
+    public function edit(Task $task)
     {
-        $task = Task::findOrFail($id);
         return view('tasks.edit', ['task' => $task]); // ← $taskを渡す
     }
 
 
     // update（最小のバリデーション＋更新）
-    public function update(TaskRequest $request, string $id)
+    public function update(TaskRequest $request, Task $task)
     {
         $validated = $request->validated();
-
-        $task = Task::findOrFail($id);  // ← 現状のメソッドシグネチャを維持
         $task->update($validated);
 
         return redirect()->route('tasks.show', $task)
@@ -60,12 +56,11 @@ class TaskController extends Controller
     }
 
     // 削除処理（DELETE /tasks/{task}）
-    public function destroy(string $id)
+    public function destroy(Task $task)
     {
-        $task = Task::findOrFail($id);
         $task->delete();
 
         return redirect()->route('tasks.index')
-        ->with('status', "ID: {$id}を削除しました");
+        ->with('status', "ID: {$task->id}を削除しました");
     }
 }
