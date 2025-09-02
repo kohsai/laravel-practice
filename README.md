@@ -79,6 +79,15 @@ docker-compose ps
   - Bladeビュー `index.blade.php`, `create.blade.php`
   ↳ logs/day3-routing-restful.md
 
+  - Task のCRUD操作を一貫して実装（create / read / update / delete）
+  - TaskRequest による FormRequest バリデーションを導入
+  - バリデーションメッセージの日本語化（`resources/lang/ja/validation.php`）
+  - `$id` → `Task $task` へのルートモデルバインディングを実施
+  ↳ logs/day3-routing-edit-update.md
+
+
+
+
 ---
 
 ## 📁 ディレクトリ構成（抜粋）
