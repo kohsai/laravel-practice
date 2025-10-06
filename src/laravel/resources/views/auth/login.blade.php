@@ -1,12 +1,21 @@
 <!-- resources/views/auth/login.blade.php -->
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>ログイン</title>
 </head>
+
 <body>
     <h1>ログイン</h1>
+    <!-- セッションメッセージ -->
+    @if (session('status'))
+        <div style="color: green;">
+            {{ session('status') }}
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
@@ -29,4 +38,5 @@
         <button type="submit">ログイン</button>
     </form>
 </body>
+
 </html>
