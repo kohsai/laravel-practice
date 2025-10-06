@@ -19,5 +19,7 @@
         @error('email')
             <div style="color:red">{{ $message }}</div>
         @enderror
+
+        <button type="submit">送信</button>
     </form>
 @endsection
