@@ -21,7 +21,7 @@
 
         <div>
             <label for="email">メールアドレス</label>
-            <input type="email" name="email" value="{{ old('email') }}" required autofocus>
+            <input type="text" name="email" value="{{ old('email') }}" required autofocus>
             @error('email')
                 <div style="color:red">{{ $message }}</div>
             @enderror
