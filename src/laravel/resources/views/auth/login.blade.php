@@ -20,7 +20,17 @@
 
         <div>
             <label for="email">メールアドレス</label>
-            <input id="email" type="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required autofocus>
+            <input
+                id="email"
+                type="email"
+                name="email"
+                value="{{ old('email') }}"
+                placeholder="you@example.com"
+                required autofocus
+                autocomplete="email"
+                inputmode="email"
+                title="有効なメールアドレスを入力してください"
+            >
             @error('email')
                 <div style="color:red">{{ $message }}</div>
             @enderror
@@ -28,7 +38,18 @@
 
         <div>
             <label for="password">パスワード</label>
-            <input id="password" type="password" name="password" placeholder="パスワードを入力" required>
+            <input
+                id="password"
+                type="password"
+                name="password"
+                placeholder="パスワードを入力"
+                required
+                minlength="8"
+                maxlength="64"
+                autocomplete="current-password"
+                inputmode="text"
+                title="8文字以上のパスワードを入力してください"
+            >
             @error('password')
                 <div style="color:red">{{ $message }}</div>
             @enderror
