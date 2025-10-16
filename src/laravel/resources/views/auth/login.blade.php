@@ -8,7 +8,7 @@
 <body>
     <h1>ログイン</h1>
 
-    <!-- セッションメッセージ -->
+    <!-- ✅ セッションメッセージ -->
     @if (session('status'))
         <div style="color: green;">
             {{ session('status') }}
@@ -18,6 +18,9 @@
     <form method="POST" action="{{ route('login') }}">
         @csrf
 
+        <!-- ==========================
+             メールアドレス入力欄
+             ========================== -->
         <div>
             <label for="email">メールアドレス</label>
             <input
@@ -31,11 +34,22 @@
                 inputmode="email"
                 title="有効なメールアドレスを入力してください"
             >
+
+            {{-- 💬 Laravel側のバリデーション（サーバー側チェック） --}}
             @error('email')
                 <div style="color:red">{{ $message }}</div>
             @enderror
+
+            {{-- 💡 JSによるリアルタイムチェック用（クライアント側チェック） --}}
+            {{-- 入力中に自動で表示・非表示を切り替えるため、inputの直後が最適 --}}
+            <div id="email-error" style="display: none; color: red;">
+                メールアドレスの形式が正しくありません
+            </div>
         </div>
 
+        <!-- ==========================
+             パスワード入力欄
+             ========================== -->
         <div>
             <label for="password">パスワード</label>
             <input
@@ -50,9 +64,16 @@
                 inputmode="text"
                 title="8文字以上のパスワードを入力してください"
             >
+
+            {{-- Laravel側のバリデーション --}}
             @error('password')
                 <div style="color:red">{{ $message }}</div>
             @enderror
+
+            {{-- JSによるリアルタイム補助メッセージ --}}
+            <div id="password-error" style="display: none; color: red;">
+                パスワードは8文字以上で入力してください
+            </div>
         </div>
 
         <button type="submit">ログイン</button>
