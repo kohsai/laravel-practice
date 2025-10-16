@@ -1,82 +1,77 @@
-<!-- resources/views/auth/login.blade.php -->
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ログイン</title>
-</head>
-<body>
-    <h1>ログイン</h1>
+{{-- resources/views/auth/login.blade.php --}}
 
-    <!-- ✅ セッションメッセージ -->
+@extends('layouts.app')
+
+@section('content')
+<div class="max-w-md mx-auto mt-8">
+    <h1 class="text-2xl font-bold text-center mb-6">ログイン</h1>
+
     @if (session('status'))
-        <div style="color: green;">
+        <div class="mb-4 text-sm text-green-600">
             {{ session('status') }}
         </div>
     @endif
 
-    <form method="POST" action="{{ route('login') }}">
+    <form method="POST" action="{{ route('login') }}" novalidate>
         @csrf
 
-        <!-- ==========================
-             メールアドレス入力欄
-             ========================== -->
-        <div>
-            <label for="email">メールアドレス</label>
-            <input
-                id="email"
-                type="email"
-                name="email"
-                value="{{ old('email') }}"
-                placeholder="you@example.com"
-                required autofocus
-                autocomplete="email"
-                inputmode="email"
-                title="有効なメールアドレスを入力してください"
-            >
+        {{-- メールアドレス --}}
+        <div class="mb-4">
+            <label for="email" class="block text-sm font-medium text-gray-700">メールアドレス</label>
+            <input id="email" name="email" type="email" required autofocus
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
+                value="{{ old('email') }}">
 
-            {{-- 💬 Laravel側のバリデーション（サーバー側チェック） --}}
+{{-- Laravel側のサーバーバリデーション --}}
             @error('email')
-                <div style="color:red">{{ $message }}</div>
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
+        </div>
 
-            {{-- 💡 JSによるリアルタイムチェック用（クライアント側チェック） --}}
-            {{-- 入力中に自動で表示・非表示を切り替えるため、inputの直後が最適 --}}
+{{-- ✅ JSリアルタイムバリデーション用 --}}
             <div id="email-error" style="display: none; color: red;">
                 メールアドレスの形式が正しくありません
             </div>
-        </div>
 
-        <!-- ==========================
-             パスワード入力欄
-             ========================== -->
-        <div>
-            <label for="password">パスワード</label>
-            <input
-                id="password"
-                type="password"
-                name="password"
-                placeholder="パスワードを入力"
-                required
-                minlength="8"
-                maxlength="64"
-                autocomplete="current-password"
-                inputmode="text"
-                title="8文字以上のパスワードを入力してください"
-            >
 
-            {{-- Laravel側のバリデーション --}}
+
+        {{-- パスワード --}}
+        <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700">パスワード</label>
+            <input id="password" name="password" type="password" required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500">
+
             @error('password')
-                <div style="color:red">{{ $message }}</div>
+                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
 
-            {{-- JSによるリアルタイム補助メッセージ --}}
+            {{-- ✅ JSリアルタイムバリデーション用 --}}
             <div id="password-error" style="display: none; color: red;">
                 パスワードは8文字以上で入力してください
             </div>
         </div>
 
-        <button type="submit">ログイン</button>
+        {{-- ログイン失敗メッセージ --}}
+        @if ($errors->has('email') && !$errors->has('password'))
+            <div class="mb-4 text-sm text-red-600">
+                メールアドレスまたはパスワードが正しくありません。
+            </div>
+        @endif
+
+        {{-- ログインボタン --}}
+        <div class="mb-4">
+            <button type="submit"
+                class="w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                ログイン
+            </button>
+        </div>
+
+        {{-- パスワード再設定リンク --}}
+        <div class="text-center">
+            <a class="text-sm text-indigo-600 hover:underline" href="{{ route('password.request') }}">
+                パスワードを忘れましたか？
+            </a>
+        </div>
     </form>
-</body>
-</html>
+</div>
+@endsection
