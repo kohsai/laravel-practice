@@ -25,6 +25,7 @@
                 pattern="[ぁ-んァ-ン一-龥a-zA-Z0-9\s]+"
                 inputmode="text"
                 title="2〜32文字の名前（漢字・ひらがな・英数字）が使えます"
+                aria-invalid="false"
             >
 
             {{-- Laravel側のバリデーション --}}
@@ -33,7 +34,7 @@
             @enderror
 
             {{-- JSリアルタイムチェック用 --}}
-            <div id="name-error" style="display: none; color: red;">
+            <div id="name-error" style="display: none; color: red;" role="alert" aria-live="polite">
                 名前は2〜32文字の範囲で入力してください
             </div>
         </div>
@@ -53,10 +54,11 @@
                 autocomplete="email"
                 inputmode="email"
                 title="有効なメールアドレスを入力してください"
+                aria-invalid="false"
             >
 
             @error('email')
-                <div style="color:red">{{ $message }}</div>
+                <div style="color:red" role="alert" aria-live="polite">{{ $message }}</div>
             @enderror
 
             <div id="email-error" style="display: none; color: red;">
@@ -80,10 +82,11 @@
                 autocomplete="new-password"
                 inputmode="text"
                 title="8文字以上の英数字でパスワードを入力してください"
+                aria-invalid="false"
             >
 
             @error('password')
-                <div style="color:red">{{ $message }}</div>
+                <div style="color:red" role="alert" aria-live="polite">{{ $message }}</div>
             @enderror
 
             <div id="password-error" style="display: none; color: red;">
@@ -107,10 +110,11 @@
                 autocomplete="new-password"
                 inputmode="text"
                 title="確認用にも同じパスワードを入力してください"
+                aria-invalid="false"
             >
 
             {{-- JSリアルタイムチェック用（Laravel側の@errorは存在しない） --}}
-            <div id="password_confirmation-error" style="display: none; color: red;">
+            <div id="password_confirmation-error" style="display: none; color: red;" role="alert" aria-live="polite">
                 パスワード（確認）が未入力です
             </div>
         </div>

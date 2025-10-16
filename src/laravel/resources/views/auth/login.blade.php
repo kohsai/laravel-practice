@@ -20,7 +20,8 @@
             <label for="email" class="block text-sm font-medium text-gray-700">メールアドレス</label>
             <input id="email" name="email" type="email" required autofocus
                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500"
-                value="{{ old('email') }}">
+                value="{{ old('email') }}"
+                aria-invalid="false">
 
             {{-- Laravel側のサーバーバリデーション --}}
             @error('email')
@@ -29,7 +30,7 @@
         </div>
 
         {{-- ✅ JSリアルタイムバリデーション用 --}}
-        <div id="email-error" style="display: none; color: red;">
+        <div id="email-error" style="display: none; color: red;" role="alert" aria-live="polite">
             メールアドレスの形式が正しくありません
         </div>
 
@@ -37,14 +38,14 @@
         <div class="mb-4">
             <label for="password" class="block text-sm font-medium text-gray-700">パスワード</label>
             <input id="password" name="password" type="password" required minlength="8"
-                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500">
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring focus:ring-indigo-200 focus:border-indigo-500" aria-invalid="false">
 
             @error('password')
                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
             @enderror
 
             {{-- ✅ JSリアルタイムバリデーション用 --}}
-            <div id="password-error" style="display: none; color: red;">
+            <div id="password-error" style="display: none; color: red;" role="alert" aria-live="polite">
                 パスワードは8文字以上で入力してください
             </div>
         </div>
