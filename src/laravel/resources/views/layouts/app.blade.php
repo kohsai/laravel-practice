@@ -11,6 +11,16 @@
     <header>
         <h1>Laravel練習アプリ</h1>
         <hr>
+
+        {{-- ▼ 仮ログアウトフォーム --}}
+        @auth
+            <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit">ログアウト</button>
+            </form>
+        @endauth
+
+
     </header>
 
     <main>

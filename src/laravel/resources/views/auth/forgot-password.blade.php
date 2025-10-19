@@ -8,14 +8,18 @@
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
 
-        <!-- セッションメッセージ -->
+        <!-- メール送信後のステータスメッセージ -->
         @if (session('status'))
             <div style="color: green;">
                 {{ session('status') }}
             </div>
         @endif
 
-        <input type="email" name="email" placeholder="登録メールアドレス" value="{{ old('email') }}">
+        <!-- メールアドレス入力欄 -->
+        <label for="email">登録メールアドレス:</label>
+        <input id="email" type="email" name="email" placeholder="例）test@example.com" value="{{ old('email') }}"
+            required>
+
         @error('email')
             <div style="color:red">{{ $message }}</div>
         @enderror

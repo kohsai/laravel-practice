@@ -14,6 +14,8 @@ use Illuminate\Support\Str;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
 
+use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
+
 class FortifyServiceProvider extends ServiceProvider
 {
     /**
@@ -45,6 +47,7 @@ class FortifyServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
         });
 
+        // Fortify が使用するビューを指定
         Fortify::loginView(function () {
             return view('auth.login');
         });
@@ -61,5 +64,20 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::resetPasswordView(function ($request) {
             return view('auth.reset-password', ['request' => $request]);
         });
+
+        // 登録後のリダイレクト先を'/'に変更
+
+        $this->app->singleton(
+            RegisterResponseContract::class,
+            function () {
+                return new class implements RegisterResponseContract {
+                    public function toResponse($request)
+                    {
+                        // 登録後にトップページへリダイレクト
+                        return redirect()->intended('/');
+                    }
+                };
+            }
+        );
     }
 }
