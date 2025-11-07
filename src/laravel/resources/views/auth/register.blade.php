@@ -30,7 +30,7 @@
 
             {{-- Laravel側のバリデーション --}}
             @error('name')
-                <div style="color:red">{{ $message }}</div>
+                <div class="text-red-600">{{ $message }}</div>
             @enderror
 
             {{-- JSリアルタイムチェック用 --}}
@@ -58,7 +58,7 @@
             >
 
             @error('email')
-                <div style="color:red" role="alert" aria-live="polite">{{ $message }}</div>
+                <div class="text-red-600" role="alert" aria-live="polite">{{ $message }}</div>
             @enderror
 
             <div id="email-error" style="display: none; color: red;">
@@ -86,7 +86,7 @@
             >
 
             @error('password')
-                <div style="color:red" role="alert" aria-live="polite">{{ $message }}</div>
+                <div class="text-red-600" role="alert" aria-live="polite">{{ $message }}</div>
             @enderror
 
             <div id="password-error" style="display: none; color: red;">
@@ -114,7 +114,7 @@
             >
 
             {{-- JSリアルタイムチェック用（Laravel側の@errorは存在しない） --}}
-            <div id="password_confirmation-error" style="display: none; color: red;" role="alert" aria-live="polite">
+            <div id="password_confirmation-error" class="text-red-600" style="display: none;" role="alert" aria-live="polite">
                 パスワード（確認）が未入力です
             </div>
         </div>
