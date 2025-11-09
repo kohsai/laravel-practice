@@ -58,10 +58,9 @@ document.addEventListener("DOMContentLoaded", function () {
             const isMatch = pwVal === pwConfVal;
 
             // aria-invalid の更新
+            const shouldShowError = isPwValid && isFilled && !isMatch;
             pwConf.setAttribute(
-                "aria-invalid",
-                !isMatch && isPwValid && isFilled ? "true" : "false"
-            );
+                "aria-invalid", shouldShowError ? "true" : "false");
 
             if (!isPwValid || !isFilled) {
                 // パスワードが未入力 or 確認欄が空 → エラー非表示

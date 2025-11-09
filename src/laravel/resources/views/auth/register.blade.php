@@ -114,7 +114,7 @@
             >
 
             {{-- JSリアルタイムチェック用（Laravel側の@errorは存在しない） --}}
-            <div id="password_confirmation-error" class="text-red-600" style="display: none;" role="alert" aria-live="polite">
+            <div id="password_confirmation-error" class="text-red-600" style="display: none; color: red;" role="alert" aria-live="polite">
                 パスワード（確認）が未入力です
             </div>
         </div>
