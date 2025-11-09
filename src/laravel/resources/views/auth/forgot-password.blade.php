@@ -3,6 +3,8 @@
 @section('title', 'パスワード再発行リクエスト')
 
 @section('content')
+
+
     <h2>パスワード再発行リンクの送信</h2>
 
     <form method="POST" action="{{ route('password.email') }}">
