@@ -11,6 +11,16 @@
     <header>
         <h1>Laravel練習アプリ</h1>
         <hr>
+
+        {{-- ▼ 仮ログアウトフォーム --}}
+        @auth
+            <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                @csrf
+                <button type="submit">ログアウト</button>
+            </form>
+        @endauth
+
+
     </header>
 
     <main>
@@ -27,6 +37,8 @@
         <hr>
         <small>&copy; {{ date('Y') }} KOH's Laravel-practice</small>
     </footer>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 </body>
 
