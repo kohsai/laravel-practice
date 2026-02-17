@@ -77,16 +77,21 @@ docker-compose ps
   - Route::resource による7アクションの自動定義
   - TaskController の各アクション実装（index / create / store / …）
   - Bladeビュー `index.blade.php`, `create.blade.php`
-  ↳ logs/day3-routing-restful.md
-
   - Task のCRUD操作を一貫して実装（create / read / update / delete）
   - TaskRequest による FormRequest バリデーションを導入
   - バリデーションメッセージの日本語化（`resources/lang/ja/validation.php`）
   - `$id` → `Task $task` へのルートモデルバインディングを実施
+  ↳ logs/day3-routing-restful.md
   ↳ logs/day3-routing-edit-update.md
 
+- Day4: Laravel Fortify認証機能
+  - ログイン・ユーザー登録・パスワードリセット
+  ↳ logs/day4-auth-fortify.md
 
-
+- Day5: Eloquent基礎とリレーション（学習中）
+  - Eloquentの基本操作（all / find / where / create / update / delete）
+  - モデルのリレーション（hasMany / belongsTo / hasOne / belongsToMany）
+  ↳ logs/day5-eloquent.md
 
 ---
 
@@ -95,6 +100,8 @@ docker-compose ps
 Laravel-practice/
 ├── docker/             # nginx, php, mysql, phpmyadmin
 ├── src/laravel/        # Laravelアプリ本体
+├── study/              # 学習復習ファイル
+│   └── laravel-coffee/ # Laravelコーヒー（復習・記憶定着）
 ├── logs/               # 学習ログ
 ├── docker-compose.yml
 └── README.md
