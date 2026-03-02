@@ -146,10 +146,10 @@
  */
 
 // User.phpに追加するコード：
-public function expenses()
-{
-    return $this->hasMany(Expense::class);
-}
+// public function expenses()
+// {
+//     return $this->hasMany(Expense::class);
+// }
 
 /**
  * 4. ファイルを保存（Ctrl+S または Cmd+S）
@@ -186,10 +186,10 @@ public function expenses()
  */
 
 // Expense.phpに追加するコード：
-public function user()
-{
-    return $this->belongsTo(User::class);
-}
+// public function user()
+// {
+//     return $this->belongsTo(User::class);
+// }
 
 /**
  * 4. ファイルを保存（Ctrl+S または Cmd+S）
@@ -227,15 +227,15 @@ public function user()
  */
 
 // ターミナルで実行：
-docker exec -it laravel-practice-php-1 bash
-php artisan tinker
+// docker exec -it laravel-practice-php-1 bash
+// php artisan tinker
 
 /**
  * 【確認1: ID=1のユーザーの支出記録を全部取得】
  */
 
 // 以下のコードをコピーしてtinkerで実行してください：
-User::find(1)->expenses;
+// User::find(1)->expenses;
 
 /**
  * → 実行結果（例）：
@@ -278,7 +278,7 @@ User::find(1)->expenses;
  */
 
 // 以下のコードをコピーしてtinkerで実行してください：
-Expense::find(1)->user;
+// Expense::find(1)->user;
 
 /**
  * → 実行結果（例）：
@@ -318,7 +318,7 @@ Expense::find(1)->user;
  */
 
 // 以下のコードをコピーしてtinkerで実行してください：
-Expense::find(1)->user->name;
+// Expense::find(1)->user->name;
 
 /**
  * → 実行結果（例）：
@@ -348,7 +348,7 @@ Expense::find(1)->user->name;
  */
 
 // 以下のコードをコピーしてtinkerで実行してください：
-User::find(1)->expenses()->count();
+// User::find(1)->expenses()->count();
 
 /**
  * → 実行結果（例）：
@@ -394,7 +394,7 @@ User::find(1)->expenses()->count();
  */
 
 // 以下のコードをコピーしてtinkerで実行してください：
-User::find(1)->expenses()->where('amount', '>=', 1000)->get();
+// User::find(1)->expenses()->where('amount', '>=', 1000)->get();
 
 /**
  * → 実行結果（例）：
