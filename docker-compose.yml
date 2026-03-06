@@ -16,6 +16,7 @@ services:
   php:
     build:
       context: ./docker/php
+    user: "1000:1000"
     volumes:
       - ./src/laravel:/var/www/html
     networks:
