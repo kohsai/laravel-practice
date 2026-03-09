@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Expense;
 use Illuminate\Http\Request;
+use Spatie\FlareClient\View;
 
 class ExpenseController extends Controller
 {
@@ -20,7 +21,7 @@ class ExpenseController extends Controller
      */
     public function create()
     {
-        //
+        return View('expenses.create');
     }
 
     /**
