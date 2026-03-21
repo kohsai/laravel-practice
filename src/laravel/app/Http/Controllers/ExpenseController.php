@@ -30,10 +30,10 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'category' => 'required|string|max:50',
-            'amount' => 'required|integer|min:1',
-            'description' => 'nullable|string|max:255',
-            'spent_at => require|date',
+            'category' => 'required|in:食費,交通費,娯楽費,その他',
+            'amount' => 'required|integer|min:1|max:9999999',
+            'description' => 'nullable|string|max:200',
+            'spent_at' => 'required|date|before_or_equal:today',
         ]);
 
         Expense::create($request->all());
