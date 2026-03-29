@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
-use Illuminate\Http\Request;
-use Spatie\FlareClient\View;
+use App\Http\Requests\StoreUserRequest;
 
 class ExpenseController extends Controller
 {
@@ -27,16 +26,9 @@ class ExpenseController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $request->validate([
-            'category' => 'required|in:食費,交通費,娯楽費,その他',
-            'amount' => 'required|integer|min:1|max:9999999',
-            'description' => 'nullable|string|max:200',
-            'spent_at' => 'required|date|before_or_equal:today',
-        ]);
-
-        Expense::create($request->all());
+        Expense::create(array_merge($request->all(), ['user_id' => 1]));
         return redirect('/expenses');
     }
 
@@ -59,7 +51,7 @@ class ExpenseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(string $id)
     {
         //
     }
