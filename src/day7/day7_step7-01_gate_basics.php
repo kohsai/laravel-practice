@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 📘 Day7 教材（Step7-01：認証と認可の違い・Gateの基礎）
+ * 📘 Day7 教材（Step7-01：認証と認可の違い・Gateの基礎）統合版
  *
  * この教材では「ログインしているかどうか」と「何をしていいか」の違いと、
  * Laravelの「Gate（ゲート）」という仕組みを学びます
@@ -39,12 +39,11 @@
  * - Day4（認証）= 「映画館に入れるか（ログインしているか）」を確認
  * - Day7（認可）= 「どのエリアに入れるか（何をしていいか）」を確認
  *
- * ---
- *
- * 【今日学ぶ3つのこと】
+ * 【今日学ぶ4つのこと】
  * 1. 認証と認可の概念の違い
- * 2. Gate（ゲート）の基礎と書き方
- * 3. Bladeテンプレートでの使い方
+ * 2. Gate（ゲート）の基礎と書き方（AppServiceProvider.php）
+ * 3. Bladeテンプレートでの使い方（@can / @cannot）
+ * 4. ブラウザで実際に確認する
  */
 
 /**
@@ -52,44 +51,28 @@
  * ✅ 【1. 認証（Authentication）と認可（Authorization）の整理】
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- * 【認証（Authentication）】
- * 読み方：オーセンティケーション
- * 略称  ：authn（オートエヌ）とも書く
+ * 【認証（Authentication：オーセンティケーション）】
  *
  * 意味：「この人は本物のユーザーか？」を確認すること
  * 実装：ログイン・ログアウト・会員登録
  * Day4で：Laravel Fortifyを使って実装済み
  *
- * 確認方法（代表的なもの）：
- *   auth()->check()  = ログインしているか（trueまたはfalse）
- *   auth()->user()   = ログイン中のユーザー情報を取得
- *   Auth::user()     = 同じ意味（書き方が違うだけ）
- *
- * 【認可（Authorization）】
- * 読み方：オーソリゼーション
- * 略称  ：authz（オートゼット）とも書く
+ * 【認可（Authorization：オーソリゼーション）】
  *
  * 意味：「この人は○○していい権限があるか？」を確認すること
  * 実装：Gate（ゲート）・Policy（ポリシー）
  * Day7で：これから学ぶ
  *
- * 例：
- * - ログインしているユーザーAさんが、Bさんの投稿を削除しようとした
- * - 認証 = Aさんはログインしている → ✅ OK
- * - 認可 = AさんはBさんの投稿を削除する権限がある？ → ❌ NG
- *
  * 【なぜ認可が必要か？】
- *
- * 認証だけでは不十分な理由を考えてみましょう。
  *
  * 例えば、ブログサービスで考えます：
  * - ユーザーAさん：自分の記事を「編集」「削除」できる
- * - ユーザーBさん：Aさんの記事を見ることはできるが、「編集」「削除」はできない
+ * - ユーザーBさん：Aさんの記事は見られるが、「編集」「削除」はできない
  * - 管理者：全ての記事を「編集」「削除」できる
  *
- * これを「誰がログインしているか」だけで判断するのは無理です。
- * 「ログインしているAさんは、この記事に対して何をしていいか」という判断が必要です。
- * これが認可です。
+ * 「ログインしているか」だけで判断するのは無理です。
+ * 「ログインしているAさんは、この記事に対して何をしていいか」という
+ * 判断が必要です。これが認可です。
  */
 
 /**
@@ -107,208 +90,151 @@
  * 「この人は○○していい？」と聞くと、「OK（true）」か「NG（false）」を返します。
  *
  * 【Gateの特徴】
- * - 書く場所：app/Providers/AppServiceProvider.php（アップ サービスプロバイダー）
+ * - 書く場所：app/Providers/AppServiceProvider.php
  * - シンプルな判定に向いている
  * - モデルと直接紐づかない（紐づける場合はStep7-02のPolicyを使う）
  *
- * 【AppServiceProvider.phpとは？】
+ * 【AppServiceProvider.php（アップ サービスプロバイダー）とは？】
  * Laravelが起動するときに最初に読み込まれるファイルです。
  * アプリ全体の「準備・設定」を書く場所です。
+ * Gateの定義はここに書きます。
  *
- * 【書き方の基本】
- * Gate::define('ゲートの名前', function($user, ...) {
- *     // trueを返すと「OK」、falseを返すと「NG」
- *     return 条件;
- * });
+ * 【GateとMiddleware（ミドルウェア）の違い】
+ *
+ * どちらもアクセス制限に使いますが、守備範囲が違います。
+ *
+ * - Middleware（ミドルウェア）= ルートレベルの制限
+ *   「このURLにログインしていない人はアクセスできない」
+ *   → 映画館の入口（チケットなしは入れない）
+ *
+ * - Gate（ゲート）= 操作レベルの制限
+ *   「ログインしていても、自分の投稿でないと削除できない」
+ *   → 座席区分（S席の人しかS席には座れない）
  */
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ 【3. Gateを書いてみよう】
+ * ✅ 【3. Gateの書き方（読んで理解するセクション）】
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- * 【例：管理者だけが「記事を削除できる」Gateを作る】
+ * ※ このセクションは読んで理解するだけです。
+ *   実際にファイルを編集するのは【4. 実際に手を動かしてみよう】です。
  *
- * app/Providers/AppServiceProvider.php に以下を追加します。
+ * 【基本的な書き方】
  *
- * 【AppServiceProvider.phpの場所】
- * laravel-practice/src/laravel/app/Providers/AppServiceProvider.php
- *
- * 【変更前（最初の状態）】
- *
- * namespace App\Providers;
- * use Illuminate\Support\ServiceProvider;
- *
- * class AppServiceProvider extends ServiceProvider
- * {
- *     public function boot(): void
- *     {
- *         // ここに書く
- *     }
- * }
- *
- * 【変更後（Gateを追加）】
- *
- * namespace App\Providers;
- * use Illuminate\Support\Facades\Gate;
- * use Illuminate\Support\ServiceProvider;
- *
- * class AppServiceProvider extends ServiceProvider
- * {
- *     public function boot(): void
- *     {
- *         // Gate::define（ゲート デファイン）= 「○○という名前のGateを定義する」
- *         // 'delete-post' = このGateの名前（自由につけられる）
- *         // $user        = 現在ログインしているユーザー
- *         // $post        = 判定対象の投稿
- *         Gate::define('delete-post', function ($user, $post) {
- *             // ユーザーのIDと投稿の作成者IDが一致するときだけ「OK」
- *             return $user->id === $post->user_id;
- *         });
- *
- *         // 管理者かどうかで判定するGateの例
- *         Gate::define('admin-only', function ($user) {
- *             return $user->is_admin === true;
- *         });
- *     }
- * }
+ * Gate::define('ゲートの名前', function($user) {
+ *     return 条件;  // trueを返すとOK、falseを返すとNG
+ * });
  *
  * 【コードの意味を分解】
  *
- * Gate::define('delete-post', function ($user, $post) {
- *     return $user->id === $post->user_id;
+ * Gate::define('admin-only', function ($user) {
+ *     return $user->is_admin === 1;
  * });
  *
- * - Gate::define = 「このGateを作る」という命令
- * - 'delete-post' = Gateの名前（呼び出すときに使う）
- * - function ($user, $post) = このGateが受け取る情報
+ * - Gate::define（ゲート デファイン） = 「このGateを作る」という命令
+ * - 'admin-only' = Gateの名前（呼び出すときに使う）
+ * - function ($user) = このGateが受け取る情報
  *   - $user = ログイン中のユーザー（Laravelが自動的に渡してくれる）
- *   - $post = 比べたい投稿（呼び出すときに渡す）
- * - return $user->id === $post->user_id
- *   = 「ログイン中のユーザーのIDと投稿の作成者IDが同じならtrue（OK）」
- */
-
-/**
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ 【4. Gateを使ってみよう（コントローラーでの使い方）】
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * - return $user->is_admin === 1
+ *   = 「is_adminが1（管理者）ならtrue（OK）、そうでなければfalse（NG）」
  *
- * Gateを定義したら、コントローラーやBladeから呼び出します。
+ * 【$userは自動的に渡される】
+ * Gate::defineの$userは、現在ログインしているユーザーが
+ * Laravelによって自動的に渡されます。
+ * 自分でログイン中のユーザーを取得する必要はありません。
  *
- * 【コントローラーでの書き方：3つの方法】
+ * 【Gate名の命名ルール】
+ * 慣習的に「動詞-対象」の形が多いです：
+ * - 'admin-only'（管理者のみ）
+ * - 'update-post'（投稿を更新する）
+ * - 'delete-comment'（コメントを削除する）
  *
- * ①【Gate::allows（ゲート オールス）】= 「○○していい？」（trueかfalseで返す）
+ * ---
  *
- * use Illuminate\Support\Facades\Gate;
+ * 【コントローラーでの使い方（参考）】
  *
- * public function destroy($id)
- * {
- *     $post = Post::find($id);
+ * コントローラーでGateを使う場合は以下の3つの書き方があります。
  *
- *     if (Gate::allows('delete-post', $post)) {
- *         // OK → 削除する
- *         $post->delete();
- *         return redirect('/posts')->with('success', '削除しました');
- *     } else {
- *         // NG → エラーを返す
- *         abort(403);  // 403 = 「アクセス禁止」というHTTPステータスコード
- *     }
+ * ①【Gate::allows()（ゲート オールス）】= 「○○していい？」（trueかfalseで返す）
+ *
+ * if (Gate::allows('admin-only')) {
+ *     // OKの処理
+ * } else {
+ *     abort(403);  // NGなら「アクセス禁止」エラー
  * }
  *
- * ②【Gate::denies（ゲート デナイズ）】= 「○○してはいけない？」（allowsの逆）
+ * ②【Gate::denies()（ゲート デナイズ）】= 「○○してはいけない？」（allowsの逆）
  *
- * if (Gate::denies('delete-post', $post)) {
+ * if (Gate::denies('admin-only')) {
  *     abort(403);
  * }
- * $post->delete();
  *
- * ③【$this->authorize（ジス オーソライズ）】= 「許可なければ自動的に403エラー」
+ * ③【$this->authorize()（ジス オーソライズ）】= 「許可なければ自動的に403エラー」
+ * （一番シンプルで実務でよく使う）
  *
- * public function destroy($id)
- * {
- *     $post = Post::find($id);
- *     $this->authorize('delete-post', $post);  // ← NGなら自動でabort(403)
- *     $post->delete();
- *     return redirect('/posts')->with('success', '削除しました');
- * }
+ * $this->authorize('admin-only');
  *
  * 【3つの違いのまとめ】
+ * - Gate::allows()     → 「OK？」を自分でif文を書いて判定する
+ * - Gate::denies()     → 「NG？」を自分でif文を書いて判定する（allowsの逆）
+ * - $this->authorize() → NGなら自動でエラー。コードが一番シンプル
  *
- * - Gate::allows()  = 「OK？」→ 自分でif文を書く必要がある
- * - Gate::denies()  = 「NG？」→ allowsの逆で、自分でif文を書く
- * - $this->authorize() = 「OKでなければ自動でエラー」→ 一番シンプル
- *
- * 【どれを使えばいい？】
- * 実務では $this->authorize() が最もよく使われます。
- * コードがシンプルになるからです。
- *
- * 【abort(403)とは？】
- * abort（アボート）= 「中止する」
- * 403（フォースリースリー）= HTTPステータスコードで「アクセス禁止」の意味
+ * 【abort(403)（アボート フォー・オー・スリー）とは？】
+ * abort（アボート）= 「中断する」
+ * 403（フォー・オー・スリー）= HTTPステータスコード（エイチティーティーピー ステータスコード）で
+ *                              「アクセス禁止（Forbidden：フォービドゥン）」の意味
  * abort(403)と書くと、Laravelが自動的に「アクセス禁止」のエラーページを表示します。
- */
-
-/**
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ 【5. Bladeテンプレートでの使い方】
- * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- * 「削除ボタン」を、削除権限がある人にだけ表示したい場合、
- * Bladeテンプレートにも書けます。
+ * 【代表的なHTTPステータスコード】
+ * - 200 = OK（正常）
+ * - 403 = Forbidden（フォービドゥン）= アクセス禁止
+ * - 404 = Not Found（ノット ファウンド）= ページが見つからない
+ * - 500 = Internal Server Error（インターナル サーバー エラー）= サーバーエラー
  *
- * 【@can（アットキャン）と@cannot（アットキャノット）】
+ * ---
  *
- * @can('delete-post', $post)
- *     {{-- このユーザーはdelete-postのGateが通る（OKの場合）に表示 --}}
- *     <form method="POST" action="/posts/{{ $post->id }}">
- *         @csrf
- *         @method('DELETE')
- *         <button type="submit">削除する</button>
- *     </form>
+ * 【Bladeでの使い方（参考）】
+ *
+ * @can（アットキャン）= GateがOKの場合だけ表示する
+ * @cannot（アットキャノット）= GateがNGの場合だけ表示する
+ * @auth（アットオース）= ログインしている場合だけ処理する
+ *
+ * @can('admin-only')
+ *     管理者メニュー（管理者だけに表示）
  * @endcan
  *
- * @cannot('delete-post', $post)
- *     {{-- このユーザーはdelete-postのGateが通らない（NGの場合）に表示 --}}
- *     <p>この投稿を削除する権限がありません</p>
- * @endcannot
+ * @auth
+ *     @cannot('admin-only')
+ *         一般ユーザーメニュー（ログインしていて、かつ管理者でない人だけに表示）
+ *     @endcannot
+ * @endauth
  *
- * 【意味の分解】
- *
- * @can('delete-post', $post)
- *   = 「現在ログインしているユーザーが、$postに対してdelete-postを実行できるなら」
- *
- * @cannot('delete-post', $post)
- *   = 「できないなら」（@canの逆）
- *
- * 【注意点】
- * @can/@cannotはあくまで「表示・非表示」の制御です。
- * コントローラーでも必ずGateチェックをしてください。
- *
- * なぜなら、ボタンが表示されていなくても、
- * URLに直接アクセスすれば削除処理が実行できてしまうからです。
- * フロント（Blade）とバック（コントローラー）の両方で守ることが大切です。
+ * 【@authと@cannotを組み合わせる理由】
+ * @cannotだけだと、ログインしていない場合にも表示されてしまいます。
+ * ログインしていない場合、GateはNGとして扱うため@cannotの条件に当てはまるからです。
+ * @auth（ログインしている場合）の中に@cannotを書くことで、
+ * 「ログインしていて、かつ管理者でない人」だけに表示できます。
  */
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ 【6. 実際に手を動かしてみよう】
+ * ✅ 【4. 実際に手を動かしてみよう】
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- * 今日は「usersテーブル」のis_admin（イズアドミン）カラムを使って、
- * 「管理者だけができる操作」を Gate で判定するシンプルな例を作ります。
- *
- * 【手順1：AppServiceProvider.php にGateを追加する】
- *
- * ファイルを開いてください：
- * laravel-practice/src/laravel/app/Providers/AppServiceProvider.php
- *
- * 【現在のファイルの内容を確認】
- * まず今のファイルの内容をVSCodeで確認してください。
- * （Laravelの初期状態ではbootメソッドが空になっています）
+ * 今日は以下の4つの作業をします。
+ * ① AppServiceProvider.phpにGateを追加する
+ * ② usersテーブルにis_adminカラムを追加する（マイグレーション）
+ * ③ tinkerでGateの動きを確認する
+ * ④ home.blade.phpでブラウザ上の表示・非表示を確認する
  */
 
-// 【手順1：AppServiceProvider.php を以下のように書き換えてください】
-// ファイルパス：app/Providers/AppServiceProvider.php
+/**
+ * 【手順1：AppServiceProvider.phpを書き換える】
+ *
+ * ファイルの場所：
+ * laravel-practice/src/laravel/app/Providers/AppServiceProvider.php
+ */
 
 // 以下のコードをコピーしてAppServiceProvider.phpに貼り付けてください：
 /*
@@ -316,8 +242,8 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -348,163 +274,229 @@ class AppServiceProvider extends ServiceProvider
 /**
  * 【手順2：マイグレーションでis_adminカラムを追加する】
  *
- * 現在のusersテーブルにis_adminカラムはありません。
- * マイグレーションを作成して追加します。
+ * usersテーブルに「管理者かどうか」を記録するカラムを追加します。
  */
 
-// 以下のコマンドをターミナルで実行してください（Dockerコンテナ内）：
-// cd ~/venpro/laravel-practice
-// docker compose exec app php artisan make:migration add_is_admin_to_users_table --table=users
+// マイグレーションファイルを作成（以下のコマンドをターミナルで実行してください）：
+// docker compose exec php php artisan make:migration add_is_admin_to_users_table --table=users
 
 /**
- * 作成されたマイグレーションファイルを編集します。
- * ファイルの場所：database/migrations/xxxx_xx_xx_xxxxxx_add_is_admin_to_users_table.php
+ * 作成されたファイル（database/migrations/xxxx_add_is_admin_to_users_table.php）を
+ * 以下のように編集してください：
  */
 
-// 以下のコードをコピーしてマイグレーションファイルに貼り付けてください：
+// 以下のコードをup()とdown()に貼り付けてください：
 /*
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
+public function up(): void
 {
-    public function up(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            // is_admin（イズアドミン）カラムを追加
-            // boolean（ブーリアン）= true（1）かfalse（0）の2択
-            // default(0)（デフォルト）= 初期値は0（管理者ではない）
-            $table->boolean('is_admin')->default(0)->after('email');
-        });
-    }
+    Schema::table('users', function (Blueprint $table) {
+        // is_admin（イズアドミン）カラムを追加
+        // boolean（ブーリアン）= 1か0の2択（1=管理者、0=一般ユーザー）
+        // default(0)（デフォルト）= 初期値は0（管理者ではない）
+        // after('email')（アフター）= emailカラムの直後に追加
+        $table->boolean('is_admin')->default(0)->after('email');
+    });
+}
 
-    public function down(): void
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('is_admin');
-        });
-    }
-};
+public function down(): void
+{
+    Schema::table('users', function (Blueprint $table) {
+        // マイグレーションを元に戻すときにis_adminカラムを削除する
+        $table->dropColumn('is_admin');
+    });
+}
 */
 
-/**
- * 【手順3：マイグレーションを実行する】
- */
-
-// ターミナルで以下のコマンドを実行してください：
-// docker compose exec app php artisan migrate
+// マイグレーションを実行してください（以下のコマンドをターミナルで実行してください）：
+// docker compose exec php php artisan migrate
 
 /**
- * 【手順4：tinkerでテストデータを準備する】
+ * → phpMyAdminでusersテーブルを確認すると、
+ *   emailの直後にis_adminカラムが追加されています。
  */
 
-// ターミナルで以下のコマンドを実行してください：
-// docker compose exec app php artisan tinker
+/**
+ * 【手順3：tinkerでGateの動きを確認する】
+ *
+ * ※ この手順はDocker環境で学習している場合の手順です。
+ *
+ * 通常の tinker 起動コマンド（php artisan tinker）だと
+ * 設定ファイルへの書き込み権限エラーが出る場合があります。
+ * 以下の特殊なコマンドで起動してください：
+ */
 
-// tinker内で以下を実行してください（1行ずつ）：
+// docker compose exec -e XDG_CONFIG_HOME=/tmp php php artisan tinker
+
+/**
+ * 【-e XDG_CONFIG_HOME=/tmp の意味】
+ * tinkerは設定ファイルを「/.config/psysh」に保存しようとしますが、
+ * Dockerコンテナ内ではこのフォルダへの書き込み権限がなくエラーになります。
+ * -e XDG_CONFIG_HOME=/tmp を付けることで、
+ * 設定の保存場所を書き込みOKな/tmpフォルダに変更できます。
+ *
+ * tinker起動後、以下を1行ずつ実行してください：
+ */
 
 // 1. ID=1のユーザーを管理者にする（以下のコードをコピーして実行してください）：
 // $user = User::find(1); $user->is_admin = 1; $user->save();
 
-// 2. 管理者フラグを確認する（以下のコードをコピーして実行してください）：
-// User::find(1)->is_admin;
-
 /**
- * → 1 と表示されれば管理者フラグが設定されています
- *
- * 【手順5：tinkerでGateを確認する】
+ * → true と表示されれば保存成功です
+ * → phpMyAdminでusersテーブルを確認すると is_admin が 0 → 1 に変わっています
  */
 
-// tinker内で以下を実行してください：
-
-// 3. ユーザーとしてGateをテストする（以下のコードをコピーして実行してください）：
-// $user = User::find(1); Gate::forUser($user)->allows('admin-only');
+// 2. 管理者GateがOKになるか確認する（以下のコードをコピーして実行してください）：
+// Gate::forUser($user)->allows('admin-only');
 
 /**
  * → true と表示されれば管理者ユーザーに対してGateが正常に機能しています
  */
 
-// 4. 別のユーザーでテストする（以下のコードをコピーして実行してください）：
+// 3. 別のユーザーでNGになるか確認する（以下のコードをコピーして実行してください）：
 // $user2 = User::find(2); Gate::forUser($user2)->allows('admin-only');
 
 /**
- * → false と表示されれば、管理者でないユーザーはGateをパスできないことを確認できます
+ * → false と表示されれば、管理者でないユーザーはGateをパスできません
+ * ※ ID=2のユーザーがいない場合はエラーが出ます。その場合は手順4に進んでください。
+ */
+
+// 4. tinkerを終了する（以下のコードをコピーして実行してください）：
+// exit
+
+/**
+ * 【手順4：home.blade.phpでブラウザ上の表示・非表示を確認する】
  *
- * ※ User::find(2) に該当するユーザーがいない場合はエラーが出ます。
- *   その場合は別のユーザーIDを試してください。
+ * ファイルの場所：
+ * laravel-practice/src/laravel/resources/views/home.blade.php
+ */
+
+// 以下のコードをコピーしてhome.blade.phpに貼り付けてください：
+/*
+@extends('layouts.app')
+
+@section('title', 'ホームページ')
+
+@section('content')
+    <p>こんにちは、KOH！LaravelのBladeテンプレートが正しく動作しています！</p>
+
+    {{-- @can（アットキャン）= admin-onlyゲートがOKの場合だけ表示する --}}
+    @can('admin-only')
+        <div style="margin-top: 16px; padding: 12px; background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px;">
+            ⭐ 管理者メニュー（管理者だけに見えています）
+        </div>
+    @endcan
+
+    {{-- @auth = ログインしている場合だけ処理する --}}
+    {{-- @cannot = admin-onlyゲートがNGの場合だけ表示する --}}
+    {{-- この2つを組み合わせることで「ログインしていて、かつ管理者でない人」だけに表示できる --}}
+    @auth
+        @cannot('admin-only')
+            <div style="margin-top: 16px; padding: 12px; background-color: #f3f4f6; border: 1px solid #d1d5db; border-radius: 6px;">
+                一般ユーザーとしてログインしています
+            </div>
+        @endcannot
+    @endauth
+@endsection
+*/
+
+/**
+ * 【ブラウザで確認する】
+ *
+ * http://localhost:8080/home にアクセスして以下の3パターンを確認してください：
+ *
+ * ①ログアウト状態
+ *   → 管理者メニューも一般ユーザーメッセージも表示されない
+ *
+ * ②管理者（is_admin=1）でログイン
+ *   → 「⭐ 管理者メニュー（管理者だけに見えています）」が表示される
+ *
+ * ③一般ユーザー（is_admin=0）でログイン
+ *   → 「一般ユーザーとしてログインしています」が表示される
+ *   → register画面（localhost:8080/register）から新規登録したユーザーは
+ *     is_adminが0（デフォルト値）なので一般ユーザーとして扱われます
+ *
+ * 【パスワードを忘れた場合のリセット方法】
+ */
+
+// tinkerを起動してください：
+// docker compose exec -e XDG_CONFIG_HOME=/tmp php php artisan tinker
+
+// パスワードをリセットしてください（以下のコードをコピーして実行してください）：
+// $user = User::find(1); $user->password = bcrypt('password123'); $user->save();
+
+/**
+ * → true と表示されればパスワードが「password123」にリセットされます
  */
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- * ✅ 【7. よくある疑問Q&A】
+ * 📝 【第2部：学習中に出た質問と回答】
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  *
- * Q1. Gate と middleware（ミドルウェア）の違いは何ですか？
- * A1. どちらもアクセス制限に使いますが、守備範囲が違います。
- *
- *     middleware = ルートレベルの制限（このURLにアクセスできるか）
- *     Gate       = 操作レベルの制限（この操作をしていいか）
- *
- *     例：
- *     middleware：「ログインしていない人はこのページに入れない」
- *     Gate：「ログインしていても、自分の投稿でないと削除できない」
- *
- *     映画館のたとえ：
- *     middleware = 映画館の入口（チケットなしは入れない）
- *     Gate       = 座席区分（S席の人しかS席には座れない）
+ * Q1. Gate・Policyは実務では必要か？
+ * A1. 必須です。
+ *     「ログインしている人なら誰でも何でもできる」アプリは実務では存在しません。
+ *     「自分のデータしか編集・削除できない」という制御は最低限の要件です。
+ *     GodeVenでも確実に必要になる知識です。
  *
  * ---
  *
- * Q2. $userは自動的に渡されるのですか？
- * A2. はい、Gate::defineの第1引数の$userは、
- *     現在ログインしているユーザーがLaravelによって自動的に渡されます。
- *     自分でログイン中のユーザーを取得する必要はありません。
- *
- *     ただし、ログインしていない場合はnull（ヌル）が渡されます。
- *     その場合を考慮する場合は以下のように書きます：
- *
- *     Gate::define('admin-only', function (?User $user) {
- *         return $user?->is_admin === 1;
- *     });
- *     （?User = ユーザーがnullの可能性があることを示す）
+ * Q2. git status と git status -u の違いは何か？
+ * A2. - git status   = 未追跡ファイルはフォルダ単位でまとめて表示（src/day7/）
+ *     - git status -u = 未追跡ファイルをファイル単位で個別に表示
+ *                       （src/day7/day7_step7-01_gate_basics.php）
+ *     -u は「untracked（アントラックド）= 未追跡」の略です。
+ *     フォルダの中に何があるか確認したいときに使います。
  *
  * ---
  *
- * Q3. Gate の名前は何でもいいですか？
- * A3. 自由に決められますが、わかりやすい名前をつけましょう。
+ * Q3. git statusで「modified」と表示されるのはなぜか？
+ * A3. modified（モディファイド）= 「変更済み」という意味です。
+ *     Gitが管理しているファイル（過去にコミット済みのファイル）が
+ *     変更されたときに表示されます。
  *
- *     慣習的に「動詞-対象」の形が多いです：
- *     - 'update-post'（投稿を更新する）
- *     - 'delete-comment'（コメントを削除する）
- *     - 'admin-only'（管理者のみ）
- *
- * ---
- *
- * Q4. abort(403)とはどういう意味ですか？
- * A4. abort（アボート）は「中断する」という意味で、
- *     引数の数字はHTTPステータスコード（エイチティーティーピー ステータスコード）です。
- *
- *     代表的なHTTPステータスコード：
- *     - 200 = OK（正常）
- *     - 404 = Not Found（ページが見つからない）
- *     - 403 = Forbidden（アクセス禁止）
- *     - 500 = Internal Server Error（サーバーエラー）
- *
- *     abort(403)と書くと、Laravelが「403.blade.php」を探して
- *     エラーページを表示します。
+ *     【UntrackedとModifiedの違い】
+ *     - Untracked = Gitがまだ知らない新しいファイル
+ *     - Modified  = Gitが知っているファイルが変更された
  *
  * ---
  *
- * Q5. GateとPolicyはどう使い分けますか？
- * A5. シンプルな判定ならGate、モデルに関係する判定ならPolicyが向いています。
+ * Q4. tinkerを起動するコマンドに「-e XDG_CONFIG_HOME=/tmp」が必要な理由は？
+ * A4. tinkerは設定ファイルを「/.config/psysh」というフォルダに保存しようとしますが、
+ *     Dockerコンテナ内ではこのフォルダへの書き込み権限がないためエラーになります。
+ *     -e XDG_CONFIG_HOME=/tmp を付けることで、
+ *     設定の保存場所を書き込みOKな/tmpフォルダに変更できます。
  *
- *     Gate  → シンプルな条件（「管理者か」「ログインしているか」など）
- *     Policy → 特定のモデルに関する操作（「この投稿を編集・削除できるか」など）
+ * ---
  *
- *     Policyについては Step7-02 で詳しく学びます。
+ * Q5. @cannotだけだと、ログインしていない状態でも表示されてしまうのはなぜか？
+ * A5. @cannotは「このGateがNGの場合」に表示します。
+ *     ログインしていない場合、Gateは判定できないため「NG」として扱われます。
+ *     結果として、ログインしていない人にも表示されてしまいます。
+ *
+ *     解決策：@authと組み合わせる
+ *     @auth（ログインしている場合）の中に@cannotを書くことで、
+ *     「ログインしていて、かつ管理者でない人」だけに表示できます。
+ *
+ * ---
+ *
+ * Q6. register画面から登録したユーザーは一般ユーザーになるか？
+ * A6. はい、なります。
+ *     is_adminカラムのデフォルト値は0（一般ユーザー）なので、
+ *     register画面から登録したユーザーは全員is_admin=0で登録されます。
+ *
+ *     管理者にするにはtinkerで以下を実行してください：
+ */
+
+// tinkerを起動してください：
+// docker compose exec -e XDG_CONFIG_HOME=/tmp php php artisan tinker
+
+// 対象ユーザーのIDを確認してから管理者に変更してください（以下をコピーして実行してください）：
+// $user = User::find(IDの番号); $user->is_admin = 1; $user->save();
+
+/**
+ * → true と表示されれば管理者への変更が完了です
+ * → IDの番号はphpMyAdminのusersテーブルで確認できます
  */
 
 /**
@@ -532,15 +524,21 @@ return new class extends Migration
  *
  * $this->authorize（ジス オーソライズ）
  * └─ 「OKでなければ自動でabort(403)を実行する」省略形
+ *    実務で最もよく使われる書き方
  *
- * abort(403)（アボート フォースリースリー）
+ * abort(403)（アボート フォー・オー・スリー）
  * └─ 「アクセス禁止」エラーページを表示して処理を中断する
+ *    403 = Forbidden（フォービドゥン）= アクセス禁止
  *
  * @can（アットキャン）
  * └─ BladeでGateがOKの場合だけ表示するディレクティブ
  *
  * @cannot（アットキャノット）
  * └─ BladeでGateがNGの場合だけ表示するディレクティブ
+ *
+ * @auth（アットオース）
+ * └─ ログインしている場合だけ処理するディレクティブ
+ *    @cannotと組み合わせて「ログインしていて、かつ管理者でない人」を判定できる
  *
  * is_admin（イズアドミン）
  * └─ 管理者かどうかを示すカラム名（1=管理者、0=一般ユーザー）
@@ -551,4 +549,15 @@ return new class extends Migration
  * AppServiceProvider（アップ サービスプロバイダー）
  * └─ Laravelが起動するときに読み込まれる準備ファイル
  *    Gateの定義はここに書く
+ *
+ * modified（モディファイド）
+ * └─ git statusで表示される「変更済み」を意味する言葉
+ *
+ * XDG_CONFIG_HOME（エックスディージー コンフィグ ホーム）
+ * └─ 設定ファイルの保存場所を指定する環境変数
+ *    /tmpを指定することでDockerコンテナ内の権限問題を回避できる
+ *
+ * HTTPステータスコード（エイチティーティーピー ステータスコード）
+ * └─ サーバーからブラウザへの「結果報告」の番号
+ *    200=正常、403=アクセス禁止、404=見つからない、500=サーバーエラー
  */
