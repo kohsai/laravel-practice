@@ -1,4 +1,5 @@
 <?php
+
 /**
  * 📘 Day7 教材（Step7-02：Policyの作成と使い方）統合版
  *
@@ -248,29 +249,29 @@
  *
  * class ExpenseController extends Controller
  * {
- *     /**
- *      * 一覧表示
- *      * 全支出データを取得してビューに渡す（未実装・Step7-04で実装予定）
- *      */
+ *
+ *     // 一覧表示
+ *     // 全支出データを取得してビューに渡す（未実装・Step7-04で実装予定）
+
  *     public function index()
  *     {
  *         //
  *     }
  *
- *     /**
- *      * 作成フォーム表示
- *      * 支出登録フォームのページを表示する
- *      */
+ *
+ *     // 作成フォーム表示
+ *     // 支出登録フォームのページを表示する
+
  *     public function create()
  *     {
  *         return view('expenses.create');
  *         // view('expenses.create') = resources/views/expenses/create.blade.php を表示する
  *     }
  *
- *     /**
- *      * 保存処理
- *      * フォームの入力データをバリデーション済みで受け取り、DBに保存する
- *      */
+ *
+ *     // 保存処理
+ *     // フォームの入力データをバリデーション済みで受け取り、DBに保存する
+
  *     public function store(StoreUserRequest $request)
  *     {
  *         Expense::create(array_merge($request->validated(), ['user_id' => auth()->id()]));
@@ -282,18 +283,18 @@
  *         // 保存後、支出一覧ページにリダイレクト（移動）する
  *     }
  *
- *     /**
- *      * 詳細表示（未実装）
- *      */
+ *
+ *     // 詳細表示（未実装）
+
  *     public function show(string $id)
  *     {
  *         //
  *     }
  *
- *     /**
- *      * 編集フォーム表示
- *      * 指定した支出の編集フォームを表示する
- *      */
+ *
+ *     // 編集フォーム表示
+ *     // 指定した支出の編集フォームを表示する
+
  *     public function edit(Expense $expense)
  *     {
  *         $this->authorize('update', $expense);
@@ -305,10 +306,10 @@
  *         // compact('expense') = $expense変数をビューに渡す
  *     }
  *
- *     /**
- *      * 更新処理
- *      * フォームの入力データをバリデーション済みで受け取り、DBを更新する
- *      */
+ *
+ *     // 更新処理
+ *     // フォームの入力データをバリデーション済みで受け取り、DBを更新する
+
  *     public function update(StoreUserRequest $request, Expense $expense)
  *     {
  *         $this->authorize('update', $expense);
@@ -320,10 +321,10 @@
  *         // 更新後、支出一覧ページにリダイレクトする
  *     }
  *
- *     /**
- *      * 削除処理
- *      * 指定した支出をDBから削除する
- *      */
+ *
+ *     // 削除処理
+ *     // 指定した支出をDBから削除する
+
  *     public function destroy(Expense $expense)
  *     {
  *         $this->authorize('delete', $expense);
