@@ -13,4 +13,10 @@ class Tag extends Model
     {
         return $this->belongsToMany(User::class);
     }
+
+    // 多対多リレーション：このタグがついている支出たち
+    public function expenses()
+    {
+        return $this->belongsToMany(Expense::class);
+    }
 }
