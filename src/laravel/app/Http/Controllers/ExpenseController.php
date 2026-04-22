@@ -11,11 +11,17 @@ class ExpenseController extends Controller
     // 一覧表示
     public function index()
     {
-        $expenses = Expense::with('tags')
-            ->where('user_id', auth()->id())
-            ->latest('spent_at')
-            ->get();
-
+        $user = auth()->user();
+        // admin ロールを持つユーザーは全員分の支出を表示
+        if ($user->hasRole('admin')) {
+            $expenses = Expense::with('tags')->latest()->get();
+        } else {
+            // 一般ユーザーは自分の支出だけ表示
+            $expenses = Expense::with('tags')
+                ->where('user_id', $user->id)
+                ->latest()
+                ->get();
+        }
         return view('expenses.index', compact('expenses'));
     }
 

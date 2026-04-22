@@ -5,8 +5,10 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use App\Models\Role;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
 
 class User extends Authenticatable
 {
@@ -52,5 +54,25 @@ class User extends Authenticatable
     public function tags()
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    /**
+     * このユーザーが持つロールを取得する
+     * 多対多（たたいた）リレーション
+     */
+    public function roles()
+    {
+        return $this->belongsToMany(Role::class);
+    }
+
+    /**
+     * 指定したロールを持っているか確認する
+     *
+     * 使い方：$user->hasRole('admin')
+     * → admin ロールを持っていれば true、なければ false
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles->contains('name', $roleName);
     }
 }

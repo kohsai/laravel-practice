@@ -45,6 +45,12 @@ class ExpensePolicy
      */
     public function update(User $user, Expense $expense): bool
     {
+        // admin ロールを持つユーザーは誰の Expense でも編集できる
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        // それ以外は自分の Expense だけ編集できる
         return $user->id === $expense->user_id;
         // ログイン中のユーザーIDと、支出の所有者のIDが一致するか？
     }
@@ -56,6 +62,12 @@ class ExpensePolicy
      */
     public function delete(User $user, Expense $expense): bool
     {
+
+        // admin ロールを持つユーザーは誰の Expense でも削除できる
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+        // それ以外は自分の Expense だけ削除できる
         return $user->id === $expense->user_id;
         // ログイン中のユーザーIDと、支出の所有者のIDが一致するか？
     }
