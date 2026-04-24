@@ -36,14 +36,26 @@ class ExpenseController extends Controller
     // 保存処理
     public function store(StoreUserRequest $request)
     {
+
+        $imagePath = null;
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('expenses', 'public');
+        }
+
         $expense = Expense::create(
-            array_merge($request->validated(), ['user_id' => auth()->id()])
+            array_merge($request->validated(), [
+                'user_id' => auth()->id(),
+                'image_path' => $imagePath,
+            ])
         );
 
         $expense->tags()->sync($request->input('tag_ids', []));
 
         return redirect()->route('expenses.index')->with('success', '支出を登録しました');
     }
+
+
 
     // 詳細表示
     public function show(string $id)

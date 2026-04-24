@@ -15,6 +15,7 @@ class Expense extends Model
         'amount',
         'description',
         'spent_at',
+        'image_path',
     ];
 
     public function user()

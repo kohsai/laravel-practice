@@ -27,6 +27,7 @@
                 <th>金額</th>
                 <th>説明</th>
                 <th>タグ</th>
+                <th>画像</th>
                 <th>操作</th>
             </tr>
             @foreach ($expenses as $expense)
@@ -42,6 +43,13 @@
                             </span>
                         @endforeach
                     </td>
+                    <td>
+                        @if ($expense->image_path)
+                            <img src="{{ Storage::url($expense->image_path) }}" alt="支出画像" width="100">
+                        @endif
+                    </td>
+
+
                     <td>
                         <a href="{{ route('expenses.edit', $expense) }}">編集</a>
                         <form method="POST" action="{{ route('expenses.destroy', $expense) }}" style="display:inline;">

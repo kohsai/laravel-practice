@@ -25,7 +25,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('expenses.store') }}">
+    <form method="POST" action="{{ route('expenses.store') }}" enctype="multipart/form-data">
         @csrf
         <div>
             <label>カテゴリ</label><br>
@@ -69,6 +69,10 @@
             @endforeach
         </div>
 
+        <div>
+            <label for="image">画像（任意）</label>
+            <input type="file" id="image" name="image" accept="image/*">
+        </div>
 
         <button type="submit">登録する</button>
     </form>
