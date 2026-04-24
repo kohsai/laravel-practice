@@ -31,6 +31,12 @@
  * 【現在の expensesテーブルのカラム（Step8-01で確認済み）】
  * id / user_id / category / amount / description / spent_at
  * ↑ image_path がまだない → 今回追加します
+ *
+ * 【.env の確認（重要）】
+ * Storage::url() は APP_URL を基にURLを生成します。
+ * APP_URL にポート番号がないと画像が表示されません。
+ * .env の APP_URL が以下のようになっているか確認してください：
+ * APP_URL=http://localhost:8080
  */
 
 /**
@@ -161,21 +167,7 @@ return new class extends Migration
  * 「まとめて保存（create/update）を許可するカラムのリスト」です。
  * リストに入っていないカラムは、まとめて保存ができません。
  *
- * 【現在の $fillable（Day5 で設定したもの）】
- */
-
-// 現在の Expense.php の $fillable はおそらくこのような状態です：
-// protected $fillable = [
-//     'user_id',
-//     'category',
-//     'amount',
-//     'description',
-//     'spent_at',
-// ];
-
-/**
- * 【修正後】
- * 'image_path' を追加してください：
+ * 【修正後の $fillable】
  */
 
 // app/Models/Expense.php の $fillable を以下のように修正してください：
@@ -220,8 +212,12 @@ protected $fillable = [
  * この enctype を忘れると、ファイルがサーバーに届きません。
  * よくあるミスなので、必ず確認してください。
  *
+ * 【注意】
+ * enctype はHTMLの仕様であり、Laravelに限らずWebのファイルアップロード全般で必要です。
+ * スクールの教材では触れていないケースが多いですが、実務では必ず使います。
+ *
  * 【追加する入力欄】
- * </form> の閉じタグの前に、以下を追加してください：
+ * </form> の閉じタグの前（登録ボタンの前）に追加してください：
  */
 
 // create.blade.php に追加するコード：
@@ -248,43 +244,36 @@ protected $fillable = [
  *
  * ExpenseController.php の store() に画像保存の処理を追加します。
  *
- * 【store() の現在の処理（Day6 で実装済み）】
- * 1. バリデーション（入力値の検証）
- * 2. Expense::create() でデータを保存
- * 3. redirect で一覧ページに戻る
+ * 【このプロジェクトの store() の構造（Day6 で実装済み）】
+ * StoreUserRequest（ストア・ユーザー・リクエスト）というフォームリクエストを
+ * 使ってバリデーションを行っています。
  *
- * 【今回追加する処理】
- * バリデーションと Expense::create() の間に、以下を追加します：
- * 「画像が送られてきたら storage に保存して、パスを変数に入れる」
+ * フォームリクエストとは？
+ * → バリデーションのルールを別ファイルに切り出したものです
+ * → app/Http/Requests/StoreUserRequest.php に定義されています
+ * → コントローラーがすっきり書ける利点があります
  *
  * 【修正後の store() メソッド】
  */
 
 // ExpenseController.php の store() を以下のように修正してください：
 /*
-public function store(Request $request)
+public function store(StoreUserRequest $request)
 {
-    $validated = $request->validate([
-        'category'    => 'required|string|max:255',
-        'amount'      => 'required|integer|min:1',
-        'description' => 'nullable|string|max:1000',
-        'spent_at'    => 'required|date',
-    ]);
-
     $imagePath = null;
 
     if ($request->hasFile('image')) {
         $imagePath = $request->file('image')->store('expenses', 'public');
     }
 
-    Expense::create([
-        'user_id'     => auth()->id(),
-        'category'    => $validated['category'],
-        'amount'      => $validated['amount'],
-        'description' => $validated['description'],
-        'spent_at'    => $validated['spent_at'],
-        'image_path'  => $imagePath,
-    ]);
+    $expense = Expense::create(
+        array_merge($request->validated(), [
+            'user_id'    => auth()->id(),
+            'image_path' => $imagePath,
+        ])
+    );
+
+    $expense->tags()->sync($request->input('tag_ids', []));
 
     return redirect()->route('expenses.index')->with('success', '支出を登録しました');
 }
@@ -310,6 +299,10 @@ public function store(Request $request)
  * → Laravelが自動でランダムなファイル名をつけてくれる
  * → 保存後、'expenses/ランダム文字列.jpg' というパスを返す
  * → このパスを $imagePath に入れておく
+ *
+ * array_merge($request->validated(), [...])（アレイ・マージ）
+ * → StoreUserRequest でバリデーション済みのデータに、
+ *   user_id と image_path を追加してまとめて保存する
  *
  * 'image_path' => $imagePath
  * → 画像があれば 'expenses/abc123.jpg' が入る
@@ -338,15 +331,23 @@ public function store(Request $request)
  * 地図アプリで表示するには、住所をGPS座標（緯度・経度）に変換する必要がある。
  * Storage::url() は「住所 → GPS座標」の変換ツールにあたります。
  *
- * 【一覧ページに追加するコード】
- * @foreach のループの中に、以下を追加してください：
+ * 【Storage::url() を Blade で使う場合の注意】
+ * Storage:: はBladeファイルで @php use... を書かなくても使えます。
+ * Laravelが最初から使える状態にしてくれているためです。
+ * スクールの教材で @php use... を書かなかったのもこの理由です。
+ *
+ * 【index.blade.php への追加箇所】
+ * ①テーブルのヘッダー（<tr>）に <th>画像</th> を追加する
+ * ② @foreach ループ内のタグ表示 </td> の直後に以下を追加する：
  */
 
-// index.blade.php に追加するコード（@foreach ループの中）：
+// index.blade.php に追加するコード：
 /*
-@if ($expense->image_path)
-    <img src="{{ Storage::url($expense->image_path) }}" alt="支出画像" width="100">
-@endif
+<td>
+    @if ($expense->image_path)
+        <img src="{{ Storage::url($expense->image_path) }}" alt="支出画像" width="100">
+    @endif
+</td>
 */
 
 /**
@@ -358,22 +359,21 @@ public function store(Request $request)
  *
  * Storage::url($expense->image_path)
  * → データベースのパスをブラウザ用URLに変換する
+ * → APP_URL=http://localhost:8080 が設定されていることで正しいURLが生成される
  *
  * width="100"
  * → 画像の横幅を100ピクセルで表示する（大きすぎず小さすぎず）
- *
- * 【Storage:: を使うための準備】
- * Blade ファイルで Storage:: を使うには、ファイルの先頭に以下が必要です：
- * @php use Illuminate\Support\Facades\Storage; @endphp
- *
- * または、コントローラーから URL を渡す方法もありますが、
- * 今回は Blade 内で直接 Storage:: を使う方法で実装します。
  */
 
 /**
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  * 📋 【実装の順番まとめ】
  * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *
+ * 【0】.env の APP_URL を確認・修正する
+ *   APP_URL=http://localhost:8080
+ *   変更後は以下のコマンドでキャッシュをクリアする：
+ *   docker compose exec php php artisan config:clear
  *
  * 【1】マイグレーションファイルを作成する
  *   docker compose exec php php artisan make:migration add_image_path_to_expenses_table --table=expenses
@@ -390,13 +390,15 @@ public function store(Request $request)
  *
  * 【5】create.blade.php を修正する
  *   ・<form> タグに enctype="multipart/form-data" を追加
- *   ・ファイル選択欄を追加
+ *   ・ファイル選択欄（<input type="file">）を追加
  *
  * 【6】ExpenseController.php の store() を修正する
- *   ・画像保存の処理を追加
+ *   ・画像保存の処理（hasFile / store）を追加
+ *   ・array_merge で image_path を一緒に保存
  *
  * 【7】index.blade.php を修正する
- *   ・画像表示の処理を追加
+ *   ・<th>画像</th> をヘッダーに追加
+ *   ・<td> に画像表示コードを追加
  *
  * 【8】動作確認
  *   ・ブラウザで支出を登録（画像あり）
@@ -436,6 +438,19 @@ public function store(Request $request)
  * A5. $imagePath が null のまま保存されます。
  *     index.blade.php の @if($expense->image_path) で
  *     null の場合は画像を表示しないようにしているので問題ありません。
+ *
+ * Q6. APP_URL にポート番号がないと何が起きますか？
+ * A6. Storage::url() が生成するURLが http://localhost/storage/... になり、
+ *     実際のアプリのURL http://localhost:8080/storage/... とズレてしまいます。
+ *     画像ファイルは存在するのに画像が表示されない、という症状になります。
+ *     .env の APP_URL=http://localhost:8080 を確認してください。
+ *
+ * Q7. StoreUserRequest とは何ですか？
+ * A7. バリデーションのルールを別ファイルに切り出したクラスです。
+ *     app/Http/Requests/StoreUserRequest.php に定義されています。
+ *     コントローラーで Request の代わりに使うことで、
+ *     コントローラーがすっきり書けるようになります。
+ *     Day6 で学んだ FormRequest（フォームリクエスト）の応用です。
  */
 
 /**
@@ -460,6 +475,7 @@ public function store(Request $request)
  *
  * Storage::url()（ストレージ・ユーアールエル）
  * └─ ファイルパスをブラウザでアクセスできるURLに変換するメソッド
+ * └─ APP_URL の設定に基づいてURLを生成する
  *
  * nullable（ナラブル）
  * └─ 「nullでもOK」= 空っぽでも保存できるカラムの設定
@@ -470,4 +486,74 @@ public function store(Request $request)
  * 相対パス（そうたいぱす）
  * └─ URLではなく「ファイルの場所を表す文字列」
  * └─ 例：'expenses/abc123.jpg'
+ *
+ * StoreUserRequest（ストア・ユーザー・リクエスト）
+ * └─ バリデーションのルールを別ファイルに切り出したクラス
+ * └─ app/Http/Requests/StoreUserRequest.php に定義されている
+ * └─ FormRequest（フォームリクエスト）を継承している
+ *
+ * array_merge()（アレイ・マージ）
+ * └─ 2つの配列を1つにまとめるPHPの関数
+ * └─ validated() の結果に user_id と image_path を追加するために使用
+ */
+
+/**
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 💬 【第2部：学習中の質問と回答】
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ */
+
+/**
+ * Q. StoreUserRequest が既にあるのに、教材では Request を使う形で書かれていた。
+ *    どちらが正しいですか？
+ *
+ * A. このプロジェクトでは StoreUserRequest を使うのが正しいです。
+ *    教材は事前に既存ファイルを確認せずに作成してしまったため、
+ *    Request を直接使う汎用的な形で書いてしまいました。
+ *    既存の構造を活かして StoreUserRequest を使う形に修正しました。
+ *
+ *    【Request vs StoreUserRequest の違い】
+ *    Request → バリデーションをコントローラー内に直接書く
+ *    StoreUserRequest → バリデーションを別ファイルに切り出している
+ *    どちらも動きますが、このプロジェクトでは後者で統一されています。
+ */
+
+/**
+ * Q. enctype="multipart/form-data" はスクールの教材では学びませんでした。
+ *    なぜですか？
+ *
+ * A. enctype="multipart/form-data" はHTMLの仕様であり、
+ *    「Laravel固有の知識」ではなく「Web全般の知識」に分類されます。
+ *    スクールのLaravel教材では扱わないケースが多いです。
+ *    ただし実務では「ファイルアップロードを実装するたびに必ず必要」な知識です。
+ *
+ *    【たとえ話】
+ *    普通の郵便（テキストのみ） → 手紙を封筒に入れて送る
+ *    multipart（ファイルあり） → 手紙と荷物を一緒に宅配便で送る
+ *    ファイルが「荷物」にあたるので、「宅配便」形式の指定が必要です。
+ */
+
+/**
+ * Q. Blade で Storage:: を使うときに @php use... を書く必要はありますか？
+ *
+ * A. 不要です。
+ *    Storage ファサードはLaravelが最初から使える状態にしてくれているため、
+ *    @php use Illuminate\Support\Facades\Storage; @endphp は書かなくても動きます。
+ *    スクールの教材でも書いていなかったのはこの理由です。
+ */
+
+/**
+ * Q. 画像ファイルは storage に保存されているのに画像が表示されなかった原因は？
+ *
+ * A. .env の APP_URL にポート番号が含まれていなかったためです。
+ *
+ *    Storage::url() は APP_URL を基にURLを生成します。
+ *    APP_URL=http://localhost の場合：
+ *    → http://localhost/storage/expenses/abc123.jpg（ポートなし・間違い）
+ *
+ *    APP_URL=http://localhost:8080 の場合：
+ *    → http://localhost:8080/storage/expenses/abc123.jpg（正しい）
+ *
+ *    .env を修正後、以下のコマンドでキャッシュをクリアしてください：
+ *    docker compose exec php php artisan config:clear
  */
