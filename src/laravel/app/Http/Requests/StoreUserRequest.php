@@ -26,6 +26,7 @@ class StoreUserRequest extends FormRequest
             'amount'      => 'required|numeric|min:1|max:9999999',
             'description' => 'nullable|string|max:200',
             'spent_at'    => 'required|date|before_or_equal:today',
+            'image' => 'nullable|image|mimes:jpeg,png,gif|max:2048',
         ];
     }
 
@@ -42,6 +43,9 @@ class StoreUserRequest extends FormRequest
             'spent_at.required' => '日付は必ず入力してください',
             'spent_at.date'     => '日付の形式が正しくありません',
             'spent_at.before_or_equal' => '日付は今日以前の日付を入力してください',
+            'image.image'       => 'アップロードできるのは画像ファイルのみです',
+            'image.mimes'       => '対応形式は jpeg・png・gif のみです',
+            'image.max'         => '画像のサイズは2MB以下にしてください',
         ];
     }
 }
