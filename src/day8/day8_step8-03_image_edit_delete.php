@@ -274,10 +274,26 @@ public function update(StoreUserRequest $request, Expense $expense)
  *     ← 上記「修正後のコード」で全体を置き換える
  *
  * 【4】ブラウザで動作確認する
- *     確認①：既存の支出に画像を追加できるか？
- *     確認②：画像を別の画像に差し替えられるか？
- *     確認③：「削除する」チェックで画像が消えるか？
- *     確認④：画像なしでそのまま更新できるか？
+ *
+ *     【重要】正しいURLは localhost:8080/expenses です（/expenses/index ではありません）
+ *     Laravelのresourceルートでは一覧ページのURLは /expenses になります。
+ *
+ *     確認①：localhost:8080/expenses → 画像なしの支出の「編集」をクリック
+ *             → localhost:8080/expenses/{id}/edit で画像を選択して「更新する」
+ *             → localhost:8080/expenses で画像が表示されるか確認
+ *
+ *     確認②：localhost:8080/expenses → 画像ありの支出の「編集」をクリック
+ *             → localhost:8080/expenses/{id}/edit で別の画像を選択して「更新する」
+ *             → localhost:8080/expenses で画像が差し替わっているか確認
+ *
+ *     確認③：localhost:8080/expenses → 画像ありの支出の「編集」をクリック
+ *             → localhost:8080/expenses/{id}/edit で「この画像を削除する」にチェックして「更新する」
+ *             → localhost:8080/expenses で画像欄が空になっているか確認
+ *
+ *     確認④：localhost:8080/expenses → 画像ありの支出の「編集」をクリック
+ *             → localhost:8080/expenses/{id}/edit で何も変えずに「更新する」
+ *             → localhost:8080/expenses で画像がそのまま残っているか確認
+ *             ※「支出を更新しました」メッセージが出れば成功（見た目の変化はない）
  */
 
 /**
@@ -319,6 +335,45 @@ public function update(StoreUserRequest $request, Expense $expense)
  *     @use(Storage) の記述は必要ありません。
  *     ただし index.blade.php ですでに Storage::url() が動作しているなら
  *     edit.blade.php でも同様に動作します。
+ *
+ * Q7. nginxの「413 Request Entity Too Large」エラーとは何ですか？
+ * A7. 「送ろうとしたファイルが大きすぎて受け取れません」というエラーです。
+ *     nginxには「受け取れるデータの最大サイズ」があり、デフォルトは1MBです。
+ *     スマホで撮った写真は3〜8MB程度あるため、そのまま送るとこのエラーになります。
+ *
+ *     【解決方法】docker/nginx/default.conf に以下を追加する：
+ *
+ *     server {
+ *         client_max_body_size 20M;  ← これを追加（20MB まで受け取れるようにする）
+ *         listen 80;
+ *         ...
+ *     }
+ *
+ *     変更後は以下のコマンドでnginxを再起動する：
+ *     docker compose restart nginx
+ *
+ *     【なぜnginxで設定するのか？】
+ *     ファイルはPHPに届く前にnginxが最初に受け取ります。
+ *     nginxの段階でサイズ制限に引っかかると、PHPまで届かずエラーになります。
+ *     PHPのバリデーションより先に弾かれるため、nginxで設定する必要があります。
+ *
+ * Q8. amountのバリデーションを integer から numeric に変えたのはなぜですか？
+ * A8. データベースから取得した金額が「4000.00」のように小数点付きで返ってくる場合があるためです。
+ *
+ *     integer（インテジャー）= 整数のみ許可
+ *     → 4000 はOK、4000.00 はNG（バリデーションエラーになる）
+ *
+ *     numeric（ニューメリック）= 数値なら許可
+ *     → 4000 も 4000.00 もOK
+ *
+ *     データベースのカラム型が decimal や float の場合、
+ *     取得した値が小数点付きで返ることがあります。
+ *     編集フォームでその値がそのまま input に入り、送信するとエラーになります。
+ *     numeric にすることで両方に対応できます。
+ *
+ *     【StoreUserRequest.php の変更箇所】
+ *     'amount' => 'required|integer|min:1|max:9999999',  // 変更前
+ *     'amount' => 'required|numeric|min:1|max:9999999',  // 変更後
  */
 
 /**
@@ -351,4 +406,46 @@ public function update(StoreUserRequest $request, Expense $expense)
  * └─ Laravelが用意している「便利な道具箱」へのアクセス方法
  * └─ Storage ファサード = ファイル操作のための道具箱
  * └─ use Illuminate\Support\Facades\Storage; で使えるようになる
+ *
+ * client_max_body_size（クライアント・マックス・ボディ・サイズ）
+ * └─ nginxが受け取れるリクエストデータの最大サイズを設定するもの
+ * └─ デフォルトは1MB。ファイルアップロードには増やす必要がある
+ * └─ docker/nginx/default.conf で設定する
+ *
+ * integer（インテジャー）
+ * └─ 「整数のみ」を許可するバリデーションルール
+ * └─ 4000はOK、4000.00はNG
+ *
+ * numeric（ニューメリック）
+ * └─ 「数値なら」許可するバリデーションルール
+ * └─ 4000も4000.00もOK
+ * └─ DBから小数点付きで返ってくる場合はintegerよりnumericが安全
+ */
+
+/**
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ * 📝 【第2部：学習中に出た質問と回答】
+ * ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ *
+ * Q. 動作確認でURLを /expenses/index と指定されたが、真っ白だった。
+ *    正しいURLは何ですか？
+ *
+ * A. 正しいURLは localhost:8080/expenses です。
+ *    /expenses/index というURLはLaravelのresourceルートには存在しません。
+ *
+ *    Route::resource('expenses', ExpenseController::class) で生成されるURLは以下です：
+ *    - 一覧：GET /expenses          → index()
+ *    - 作成フォーム：GET /expenses/create → create()
+ *    - 保存：POST /expenses         → store()
+ *    - 編集フォーム：GET /expenses/{id}/edit → edit()
+ *    - 更新：PUT /expenses/{id}     → update()
+ *    - 削除：DELETE /expenses/{id}  → destroy()
+ *
+ *    /expenses/index というURLは存在しないため、アクセスしても何も表示されません。
+ *
+ * Q. 画像アップロード時に「413 Request Entity Too Large」エラーが出た。
+ *    → Q&Aのq7を参照してください。
+ *
+ * Q. 編集フォームで「更新する」を押すと「金額は数字で入力してください」が出た。
+ *    → Q&Aのq8を参照してください。
  */
