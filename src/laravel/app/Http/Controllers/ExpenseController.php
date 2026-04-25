@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tag;
 use App\Models\Expense;
 use App\Http\Requests\StoreUserRequest;
+use Illuminate\Support\Facades\Storage;
 
 class ExpenseController extends Controller
 {
@@ -79,19 +80,40 @@ class ExpenseController extends Controller
     {
         $this->authorize('update', $expense);
 
-        $expense->update($request->validated());
+        // 【パターン①：「画像を削除するチェック」が入っている場合】
+        if ($request->input('delete_image') === '1') {
+
+            // 古い画像ファイルをストレージから削除する
+            if ($expense->image_path) {
+                Storage::disk('public')->delete($expense->image_path);
+            }
+
+            // image_path を null（空）にしてデータを更新する
+            $expense->update(array_merge($request->validated(), ['image_path' => null]));
+
+            // 【パターン②：新しい画像ファイルが送られてきた場合】
+        } elseif ($request->hasFile('image')) {
+
+            // 古い画像ファイルがあれば削除する
+            if ($expense->image_path) {
+                Storage::disk('public')->delete($expense->image_path);
+            }
+
+            // 新しい画像を保存して、そのパスを取得する
+            $imagePath = $request->file('image')->store('expenses', 'public');
+
+            // image_path を新しいパスで更新する
+            $expense->update(array_merge($request->validated(), ['image_path' => $imagePath]));
+
+            // 【パターン③：画像に変更なし】
+        } else {
+            // image_path はそのまま（validated() に含まれないので変わらない）
+            $expense->update($request->validated());
+        }
+
+        // タグを同期する（タグの処理はパターンに関係なく同じ）
         $expense->tags()->sync($request->input('tag_ids', []));
 
         return redirect()->route('expenses.index')->with('success', '支出を更新しました');
-    }
-
-    // 削除処理
-    public function destroy(Expense $expense)
-    {
-        $this->authorize('delete', $expense);
-
-        $expense->delete();
-
-        return redirect()->route('expenses.index')->with('success', '支出を削除しました');
     }
 }

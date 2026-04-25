@@ -19,7 +19,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('expenses.update', $expense) }}">
+    <form method="POST" action="{{ route('expenses.update', $expense) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -51,6 +51,27 @@
             <label>日付</label><br>
             <input type="date" name="spent_at" value="{{ old('spent_at', $expense->spent_at) }}">
             @error('spent_at')
+                <span style="color: red;">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div>
+            <label>画像</label><br>
+
+            @if ($expense->image_path)
+                <p>現在の画像：</p>
+                <img src="{{ Storage::url($expense->image_path) }}" alt="現在の画像" width="150">
+                <br>
+                <label>
+                    <input type="checkbox" name="delete_image" value="1">
+                    この画像を削除する
+                </label>
+                <br>
+            @endif
+
+            <p>新しい画像を選ぶ（任意）：</p>
+            <input type="file" name="image" accept="image/*">
+            @error('image')
                 <span style="color: red;">{{ $message }}</span>
             @enderror
         </div>

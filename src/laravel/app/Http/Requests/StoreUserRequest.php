@@ -23,7 +23,7 @@ class StoreUserRequest extends FormRequest
     {
         return [
             'category'    => 'required|in:食費,交通費,娯楽費,その他',
-            'amount'      => 'required|integer|min:1|max:9999999',
+            'amount'      => 'required|numeric|min:1|max:9999999',
             'description' => 'nullable|string|max:200',
             'spent_at'    => 'required|date|before_or_equal:today',
         ];
