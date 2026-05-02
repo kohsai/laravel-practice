@@ -1,9 +1,3 @@
-{{-- シンプルなcreate.blade.php（動作確認用）】
-
-// 以下のHTMLをcreate.blade.phpに貼り付けてください：
-
-────────────────────────────────────────── --}}
-
 <!DOCTYPE html>
 <html lang="ja">
 

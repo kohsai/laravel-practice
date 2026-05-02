@@ -3,7 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>@yield('title', 'Laravel App')</title>
+    <title>
+        @yield('title', 'Laravel App')
+    </title>
 </head>
 
 <body>
