@@ -1,0 +1,3 @@
+<div style="border: 1px solid #ccc; padding: 16px; margin-bottom: 16px; border-radius: 4px;">
+    {{ $slot }}
+</div>
