@@ -1,12 +1,9 @@
-<!DOCTYPE html>
-<html lang="ja">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <title>支出一覧</title>
-</head>
+@section('title', '支出一覧')
 
-<body>
+@section('content')
+
     <h1>支出一覧</h1>
 
     <a href="{{ route('expenses.create') }}">新しい支出を追加する</a>
@@ -35,8 +32,7 @@
                         <td>{{ $expense->description }}</td>
                         <td>
                             @foreach ($expense->tags as $tag)
-                                <span
-                                    style="background: #dbeafe; padding: 2px 8px; border-radius: 4px; margin-right: 4px;">
+                                <span style="background: #dbeafe; padding: 2px 8px; border-radius: 4px; margin-right: 4px;">
                                     {{ $tag->name }}
                                 </span>
                             @endforeach
@@ -50,8 +46,7 @@
 
                         <td>
                             <a href="{{ route('expenses.edit', $expense) }}">編集</a>
-                            <form method="POST" action="{{ route('expenses.destroy', $expense) }}"
-                                style="display:inline;">
+                            <form method="POST" action="{{ route('expenses.destroy', $expense) }}" style="display:inline;">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" onclick="return confirm('削除しますか？')">削除</button>
@@ -62,6 +57,4 @@
             </table>
         </x-card>
     @endif
-</body>
-
-</html>
+@endsection

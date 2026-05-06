@@ -1,23 +1,11 @@
-<!DOCTYPE html>
-<html lang="ja">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <title>支出を編集</title>
-</head>
+@section('title', '支出を編集')
 
-<body>
+@section('content')
     <h1>支出を編集する</h1>
 
-    @if ($errors->any())
-        <div style="color: red; border: 1px solid red; padding: 10px;">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <x-alert type="error" :errors="$errors" />
 
     <form method="POST" action="{{ route('expenses.update', $expense) }}" enctype="multipart/form-data">
         @csrf
@@ -90,6 +78,4 @@
     </form>
 
     <a href="{{ route('expenses.index') }}">一覧に戻る</a>
-</body>
-
-</html>
+@endsection

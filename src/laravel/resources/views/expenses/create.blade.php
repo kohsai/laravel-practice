@@ -1,23 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <title>支出を追加</title>
-</head>
+@section('title', '支出を追加')
 
-<body>
+@section('content')
+
     <h1>支出を追加する</h1>
 
-    @if ($errors->any())
-        <div style="color: red; border: 1px solid red; padding: 10px;">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <x-alert type="error" :errors="$errors" />
 
     <form method="POST" action="{{ route('expenses.store') }}" enctype="multipart/form-data">
         @csrf
@@ -70,6 +59,4 @@
 
         <button type="submit">登録する</button>
     </form>
-</body>
-
-</html>
+@endsection
