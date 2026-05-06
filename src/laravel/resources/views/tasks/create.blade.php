@@ -9,18 +9,7 @@
     <form action="{{ route('tasks.store') }}" method="POST">
         @csrf <!-- CSRFトークンを自動生成 -->
 
-        {{-- バリデーションエラーの表示ブロック（共通） --}}
-        @if ($errors->any())
-            <div class="alert alert-danger" role="alert">
-                <p><strong>入力に誤りがあります。</strong></p>
-                <ul>
-                    @foreach ($errors->all() as $message)
-                        <li>{{ $message }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
+        <x-alert type="error" :errors="$errors" />
 
         <label for="title">タイトル:</label><br>
         <input type="text" name="title" id="title" value="{{ old('title') }}" placeholder="必須・255文字まで"><br>
