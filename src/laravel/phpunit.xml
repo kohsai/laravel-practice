@@ -7,9 +7,11 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
+<!-- tests/Unit      → 小さな単体テスト -->
         </testsuite>
         <testsuite name="Feature">
             <directory>tests/Feature</directory>
+<!-- tests/Feature   → 実際の画面・機能のテスト -->
         </testsuite>
     </testsuites>
     <source>
@@ -19,14 +21,23 @@
     </source>
     <php>
         <env name="APP_ENV" value="testing"/>
+        <!--「今はテスト中だよ」モード -->
+
         <env name="BCRYPT_ROUNDS" value="4"/>
+        <!-- パスワード暗号化を軽くする（テストを速くする為）-->
+
         <env name="CACHE_DRIVER" value="array"/>
-        <!-- <env name="DB_CONNECTION" value="sqlite"/> -->
-        <!-- <env name="DB_DATABASE" value=":memory:"/> -->
+        <!-- キャッシュを本番DBではなく、メモリに保存 -->
+
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="PULSE_ENABLED" value="false"/>
         <env name="QUEUE_CONNECTION" value="sync"/>
+
         <env name="SESSION_DRIVER" value="array"/>
+        <!-- セッションも同様 、メモリに保存 -->
+
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
 </phpunit>
